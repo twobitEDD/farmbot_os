@@ -375,8 +375,7 @@ defmodule FarmbotFirmware do
 
   # Closing the transport will purge the buffer of queued commands in both
   # the `configuration_queue` and in the `command_queue`.
-  def handle_call(:close_transport, _from, %{status: s} = state)
-      when s != :transport_boot do
+  def handle_call(:close_transport, _from, state) do
     if is_reference(state.transport_ref) do
       true = Process.demonitor(state.transport_ref)
     end
@@ -404,9 +403,11 @@ defmodule FarmbotFirmware do
     {:reply, :ok, next_state}
   end
 
-  def handle_call(:close_transport, _, %{status: s} = state) do
-    {:reply, {:error, s}, state}
-  end
+  # WE MAY WANT TO REVERT THIS AND ADD GUARD CLAUSE BACK TO
+  # `handle_call` ABOVE THIS. RC 1 MAY 2020
+  # def handle_call(:close_transport, _, %{status: s} = state) do
+  #   {:reply, {:error, s}, state}
+  # end
 
   def handle_call({:open_transport, module, args}, _from, %{status: s} = state)
       when s == :transport_boot do
